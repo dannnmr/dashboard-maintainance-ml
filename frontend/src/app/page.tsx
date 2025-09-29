@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { fetchFeatures, predictFromRecords, PredictItem } from "@/lib/api";
+import {
+  fetchFeatures,
+  predictFromRecords,
+  getMaintenanceResults,
+  PredictItem,
+} from "@/lib/api";
 
 type Row = Record<string, number>;
 
@@ -73,6 +78,21 @@ export default function Home() {
     }
   };
 
+  const getETLResults = async () => {
+    setLoading(true);
+    setResults([]);
+    try {
+      const data = await getMaintenanceResults();
+      setResults(data.results);
+      console.log("📊 Datos del ETL:", data);
+    } catch (e: any) {
+      console.error(e);
+      alert(`Error al obtener resultados del ETL: ${e?.message || e}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const hasResults = results.length > 0;
 
   return (
@@ -119,7 +139,7 @@ export default function Home() {
             </table>
           </div>
 
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex gap-2 flex-wrap">
             <button onClick={addRow} className="px-3 py-2 rounded-md border">
               + Add row
             </button>
@@ -131,8 +151,26 @@ export default function Home() {
               disabled={loading}
               className="px-4 py-2 rounded-md bg-black text-white disabled:opacity-50"
             >
-              {loading ? "Predicting…" : "Predict"}
+              {loading ? "Predicting…" : "Predict (Manual)"}
             </button>
+            <button
+              onClick={getETLResults}
+              disabled={loading}
+              className="px-4 py-2 rounded-md bg-blue-600 text-white disabled:opacity-50"
+            >
+              {loading ? "Loading…" : "🔄 Get ETL Results"}
+            </button>
+          </div>
+
+          <div className="mt-2 text-sm text-gray-600">
+            <p>
+              <strong>Manual Predict:</strong> Usa los datos que ingreses en la
+              tabla
+            </p>
+            <p>
+              <strong>Get ETL Results:</strong> Lee los últimos datos procesados
+              por tu ETL y hace inferencia
+            </p>
           </div>
 
           {hasResults && (

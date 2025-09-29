@@ -36,3 +36,12 @@ export async function predictFromRecords(
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
+
+// Nueva función para obtener resultados del ETL
+export async function getMaintenanceResults(): Promise<PredictResponse> {
+  const res = await fetch(`${BASE}/maintenance/results`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
