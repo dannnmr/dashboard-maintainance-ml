@@ -1,0 +1,64 @@
+METADATOS TÉCNICOS - TRANSFORMADOR ELÉCTRICO
+==================================================
+
+Timestamp de procesamiento: 2025-09-28 18:31:08
+Tipo de equipo: Transformador de Potencia
+Período de datos: 2024-09-10 04:00:00+00:00 a 2025-08-27 22:00:00+00:00
+Duración del monitoreo: 351 days 18:00:00
+Resolución temporal: 1 hora
+Total de registros: 8,443
+Total de variables: 13
+
+CRITERIOS DE CLASIFICACIÓN OPERACIONAL
+----------------------------------------
+
+TEMP_OIL_VALUE:
+ Descripción: Temperatura del aceite dieléctrico
+ Normal: 35.8 - 65.3
+ Alerta: 65.3 - 75.0
+ Crítico: 75.0 - inf
+
+TEMP_SPOT_HOT_VALUE:
+ Descripción: Temperatura del punto caliente (hot-spot)
+ Normal: 38.7 - 76.2
+ Alerta: 76.2 - 100.0
+ Crítico: 100.0 - inf
+
+TEMP_AMBIENT_VALUE:
+ Descripción: Temperatura ambiente (criterio estacional)
+ Normal: -10.0 - 40.0
+ Alerta: 40.0 - 50.0
+ Crítico: 50.0 - inf
+
+CURRENT_LOAD_VALUE:
+ Descripción: Corriente de carga (A) en lado BT
+ Normal: 0.0 - 1508.1
+ Alerta: 1508.1 - 1809.7
+ Crítico: 1809.7 - inf
+
+FACTOR_CARGA:
+ Descripción: Factor de carga (p.u.)
+ Normal: 0.0 - 1.0
+ Alerta: 1.0 - 1.2
+ Crítico: 1.2 - inf
+
+TAP_POSITION_VALUE:
+ Descripción: Posición del tap OLTC (0–17)
+ Normal: 6.0 - 12.0
+ Alerta: 3.0 - 15.0
+ Crítico: 0.0 - 17.0
+
+DISTRIBUCIÓN DE ESTADOS OPERACIONALES
+----------------------------------------
+
+CRITICO: 8,430 registros (99.8%)
+NORMAL: 13 registros (0.2%)
+
+Completitud de datos: 100.00%
+
+VARIABLES POR CATEGORÍA TÉCNICA
+----------------------------------------
+
+Térmica: 5 variables
+Eléctrica: 3 variables
+Mecánica: 1 variables

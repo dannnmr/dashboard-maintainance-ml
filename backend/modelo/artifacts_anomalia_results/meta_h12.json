@@ -1,0 +1,32 @@
+{
+  "lookback": 24,
+  "horizon_shift": 12,
+  "classes": [
+    "ALERTA",
+    "CRITICO",
+    "NORMAL"
+  ],
+  "normal_id": 2,
+  "ae_thr_p95": 0.653937578201294,
+  "ae_thr_f2": 1.9450721740722656,
+  "ae_roc_auc": 0.7609744315998639,
+  "ae_pr_auc": 0.380136634826941,
+  "if_thr_p95": 0.5074066531444102,
+  "if_thr_f2": 0.5072566695388215,
+  "if_roc_auc": 0.7147855530474041,
+  "if_pr_auc": 0.34163481567916915,
+  "alpha": 0.9,
+  "ens_thr_f2": 0.18421905177976186,
+  "ens_roc_auc": 0.7552262073356827,
+  "ens_pr_auc": 0.3784043120581398,
+  "ae_score_min": 0.028330162167549133,
+  "ae_score_max": 13.945631980895996,
+  "if_score_min": 0.3699640769649208,
+  "if_score_max": 0.6634523936074388,
+  "operate_with_ae_only": true,
+  "operate_thr": 0.5774267911911011,
+  "operate_f_beta": 1.0,
+  "operate_precision_target": 0.6,
+  "smoothing_k": 4,
+  "smoothing_m": 7
+}

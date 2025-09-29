@@ -1,0 +1,10 @@
+
+data/capa_bronze_v2
+data/capa_silver
+frontend/node_modules
+
+
+venv
+logs
+reports
+./reports

@@ -1,0 +1,125 @@
+DOCUMENTACIÓN TÉCNICA - FEATURES DE TRANSFORMADORES ELÉCTRICOS
+======================================================================
+
+Generado: 2025-09-28 18:34:28
+Notebook/Base: 03_feature_engineering_transformadores
+Objetivo: Mantenimiento Predictivo de Transformadores
+Horizonte de predicción: 30 días
+
+DIMENSIONES DEL DATASET
+-------------------------
+Total de registros: 8,443
+Total de features: 70
+Período temporal: 2024-09-10 04:00:00+00:00 → 2025-08-27 22:00:00+00:00
+Frecuencia: H (horaria)
+Memoria utilizada: 5.1 MB
+
+FEATURES POR CATEGORÍA TÉCNICA
+--------------------------------
+Variables Originales (13 features):
+   1. temp_oil_value
+   2. temp_oil_oltc_value
+   3. temp_ambient_value
+   4. temp_bubbling_value
+   5. temp_spot_hot_value
+   6. voltage_value
+   7. current_load_value
+   8. power_apparent_value
+   9. tap_position_value
+  10. estado_operacional
+  11. nivel_severidad
+  12. variables_anomalas
+  13. descripcion_anomalia
+Features Térmicos (26 features):
+   1. gradient_hot_oil
+   2. gradient_normalized
+   3. temp_rise_hot
+   4. temp_rise_oil
+   5. temp_oil_value_rate
+   6. temp_oil_value_accel
+   7. temp_oil_value_rate_smooth
+   8. temp_spot_hot_value_rate
+   9. temp_spot_hot_value_accel
+  10. temp_spot_hot_value_rate_smooth
+  11. temp_ambient_value_rate
+  12. temp_ambient_value_accel
+  13. temp_ambient_value_rate_smooth
+  14. temp_oil_oltc_value_rate
+  15. temp_oil_oltc_value_accel
+  16. temp_oil_oltc_value_rate_smooth
+  17. temp_bubbling_value_rate
+  18. temp_bubbling_value_accel
+  19. temp_bubbling_value_rate_smooth
+  20. thermal_efficiency
+  21. thermal_loading_factor
+  22. thermal_cycles_7d
+  23. thermal_stress_index
+  24. overheating_trend
+  25. bubbling_anomaly
+  26. gas_formation_trend
+Features Eléctricos (22 features):
+   1. load_factor_current
+   2. load_factor_power
+   3. overload_indicator
+   4. efficiency_indicator
+   5. power_factor_estimated
+   6. relative_losses
+   7. tap_operations_1d
+   8. tap_operations_7d
+   9. tap_operations_30d
+  10. tap_deviation_center
+  11. tap_extreme_position
+  12. tap_instability
+  13. current_load_value_stability
+  14. current_load_value_transient
+  15. voltage_value_stability
+  16. voltage_value_transient
+  17. power_apparent_value_stability
+  18. power_apparent_value_transient
+  19. electrical_stress_index
+  20. suboptimal_operation
+  21. efficiency_degradation_trend
+  22. efficiency_degradation_accel
+Etiquetas de Predicción (7 features):
+   1. falla_30d
+   2. estado_futuro
+   3. rul_dias
+   4. severidad_futura
+   5. dias_proximo_evento
+   6. proximidad_evento
+   7. riesgo_acumulativo
+Otros Features (2 features):
+   1. year
+   2. month
+
+ETIQUETAS DE PREDICCIÓN
+----------------------
+Etiqueta binaria: falla_30d
+Etiqueta multi-clase: estado_futuro
+RUL: rul_dias
+Severidad: severidad_futura
+
+DIVISIÓN TEMPORAL
+----------------
+Entrenamiento: 6,754 registros (80.0%)
+Validación: 1,689 registros (20.0%)
+Fecha de división: 2025-06-18 14:00:00+00:00
+
+PARÁMETROS TÉCNICOS
+------------------
+horizonte_prediccion_dias: 30
+ventana_analisis_dias: 90
+frecuencia_muestreo: H
+ventanas_rolling: [24, 72, 168, 720]
+lags_corto_plazo: [1, 6, 12, 24]
+lags_mediano_plazo: [48, 72, 168]
+lags_largo_plazo: [336, 720]
+capacidad_nominal_mva: 100
+voltaje_nominal_kv: 138
+temp_aceite_nominal: 65
+temp_ambiente_nominal: 40
+umbral_gradiente_termico: 25
+umbral_sobrecarga: 1.2
+umbral_tap_excesivo: 5
+freq_nyquist: 0.5
+n_componentes_fft: 10

@@ -1,0 +1,10 @@
+pandas
+requests
+pyarrow
+s3fs
+boto3
+polars
+deltalake
+duckdb
+python-dotenv
+requests_ntlm
