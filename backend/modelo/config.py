@@ -3,7 +3,7 @@
 # Seeds / windows
 RANDOM_STATE   = 42
 LOOKBACK       = 24       # steps per sequence
-HORIZON_SHIFT  = 12       # prediction horizon in hours (0/6/12/24...)
+HORIZON_SHIFT  = 360      # prediction horizon in hours (15 days for predictive maintenance)
 
 # Operating policy (production-facing)
 OPERATE_WITH_AE_ONLY = True  # Recommended for H=12

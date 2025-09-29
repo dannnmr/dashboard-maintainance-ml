@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Debug Frontend Predictions</title>
+  </head>
+  <body>
+    <h1>Debug Frontend Predictions</h1>
+    <div id="output"></div>
+
+    <script>
+      const API_URL = "http://localhost:8000";
+
+      async function debugPredictions() {
+        const output = document.getElementById("output");
+
+        try {
+          // 1. Test login
+          console.log("🔐 Testing login...");
+          const loginResponse = await fetch(`${API_URL}/auth/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: "admin@example.com",
+              password: "admin123",
+            }),
+          });
+
+          if (!loginResponse.ok) {
+            throw new Error(
+              `Login failed: ${loginResponse.status} ${loginResponse.statusText}`
+            );
+          }
+
+          const loginData = await loginResponse.json();
+          const token = loginData.access_token;
+          console.log("✅ Login successful!");
+
+          // 2. Test predictions endpoint
+          console.log("📊 Testing predictions endpoint...");
+          const predictionsResponse = await fetch(`${API_URL}/predictions/`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!predictionsResponse.ok) {
+            throw new Error(
+              `Predictions failed: ${predictionsResponse.status} ${predictionsResponse.statusText}`
+            );
+          }
+
+          const predictions = await predictionsResponse.json();
+          console.log("✅ Predictions retrieved:", predictions);
+
+          // 3. Test stats endpoint
+          console.log("📈 Testing stats endpoint...");
+          const statsResponse = await fetch(`${API_URL}/predictions/stats`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!statsResponse.ok) {
+            throw new Error(
+              `Stats failed: ${statsResponse.status} ${statsResponse.statusText}`
+            );
+          }
+
+          const stats = await statsResponse.json();
+          console.log("✅ Stats retrieved:", stats);
+
+          // Display results
+          output.innerHTML = `
+                    <h2>✅ All tests passed!</h2>
+                    <h3>Predictions (${predictions.length}):</h3>
+                    <pre>${JSON.stringify(predictions, null, 2)}</pre>
+                    <h3>Stats:</h3>
+                    <pre>${JSON.stringify(stats, null, 2)}</pre>
+                `;
+        } catch (error) {
+          console.error("❌ Error:", error);
+          output.innerHTML = `<h2>❌ Error:</h2><p>${error.message}</p>`;
+        }
+      }
+
+      // Run debug when page loads
+      debugPredictions();
+    </script>
+  </body>
+</html>
