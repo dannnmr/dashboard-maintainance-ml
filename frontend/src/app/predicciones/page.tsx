@@ -53,6 +53,7 @@ export default function PrediccionesPage() {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
+  const [selected, setSelected] = useState<Prediction | null>(null);
 
   // Procesar datos para gráficas
   const getAnomalyTrendData = () => {
@@ -110,6 +111,16 @@ export default function PrediccionesPage() {
     fetchPredictions();
     fetchStats();
   }, []);
+
+  // Close modal with ESC
+  useEffect(() => {
+    if (!selected) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelected(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selected]);
 
   const fetchPredictions = async () => {
     try {
@@ -287,133 +298,6 @@ export default function PrediccionesPage() {
                     </ResponsiveContainer>
                   </div>
                 </div>
-
-                {/* Score Distribution */}
-                <div className="bg-white shadow-lg rounded-2xl p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-6">
-                    Distribución de Scores
-                  </h3>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={getScoreDistribution()}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis dataKey="name" stroke="#6b7280" fontSize={12} />
-                        <YAxis stroke="#6b7280" fontSize={12} />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#ffffff",
-                            border: "1px solid #e5e7eb",
-                            borderRadius: "8px",
-                            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                          }}
-                        />
-                        <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                          {getScoreDistribution().map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column - Sidebar */}
-              <div className="space-y-6">
-                {/* Status Distribution */}
-                <div className="bg-white shadow-lg rounded-2xl p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-6">
-                    Estado de Predicciones
-                  </h3>
-                  <div className="h-48">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={getStatusDistribution()}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={40}
-                          outerRadius={80}
-                          paddingAngle={2}
-                          dataKey="value"
-                        >
-                          {getStatusDistribution().map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#ffffff",
-                            border: "1px solid #e5e7eb",
-                            borderRadius: "8px",
-                            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                          }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="mt-4 space-y-2">
-                    {getStatusDistribution().map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between text-sm"
-                      >
-                        <div className="flex items-center">
-                          <div
-                            className="w-3 h-3 rounded-full mr-2"
-                            style={{ backgroundColor: item.fill }}
-                          ></div>
-                          <span className="text-gray-600">{item.name}</span>
-                        </div>
-                        <span className="font-medium text-gray-900">
-                          {item.value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Key Metrics */}
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-100 shadow-lg rounded-2xl p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-6">
-                    Métricas Clave
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">
-                        Total Predicciones
-                      </span>
-                      <span className="text-2xl font-bold text-blue-600">
-                        {stats.total || 0}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Completadas</span>
-                      <span className="text-2xl font-bold text-green-600">
-                        {stats.completed || 0}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Fallidas</span>
-                      <span className="text-2xl font-bold text-red-600">
-                        {stats.failed || 0}
-                      </span>
-                    </div>
-                    <div className="border-t border-gray-200 pt-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">
-                          Tasa de Éxito
-                        </span>
-                        <span className="text-2xl font-bold text-indigo-600">
-                          {stats.success_rate
-                            ? stats.success_rate.toFixed(1)
-                            : "0.0"}
-                          %
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           )}
@@ -526,7 +410,10 @@ export default function PrediccionesPage() {
                             : "Ahora"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button className="text-blue-600 hover:text-blue-900">
+                          <button
+                            onClick={() => setSelected(prediction)}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
                             Ver detalles
                           </button>
                         </td>
@@ -538,6 +425,95 @@ export default function PrediccionesPage() {
             </div>
           </div>
         </div>
+        {/* Details Modal */}
+        {selected && (
+          <div
+            className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:items-center bg-black/50 backdrop-blur-sm"
+            onClick={() => setSelected(null)}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div
+              className="relative w-full max-w-2xl rounded-md bg-white shadow-lg border"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Detalle de la Predicción #{selected.index ?? selected.id}
+                  </h3>
+                  <button
+                    onClick={() => setSelected(null)}
+                    className="text-gray-500 hover:text-gray-700"
+                    aria-label="Cerrar"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <div className="text-gray-500">Estado</div>
+                    <div className="font-medium">
+                      {selected.status || selected.label || "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500">Fecha</div>
+                    <div className="font-medium">
+                      {selected.created_at
+                        ? new Date(selected.created_at).toLocaleString()
+                        : "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500">Anomalía</div>
+                    <div className="font-medium">
+                      {selected.anomaly_detected ?? selected.label === "ANOMALY"
+                        ? "Sí"
+                        : "No"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500">Score</div>
+                    <div className="font-medium">
+                      {selected.anomaly_score ?? selected.score ?? "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500">Confianza</div>
+                    <div className="font-medium">
+                      {selected.confidence_score ?? "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500">Modelo</div>
+                    <div className="font-medium">
+                      {selected.model_version ?? "-"}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-gray-500 mb-1">Resultados (JSON)</div>
+                  <pre className="overflow-auto text-xs bg-gray-50 p-3 rounded border max-h-64">
+                    {JSON.stringify(
+                      selected.prediction_results ?? selected,
+                      null,
+                      2
+                    )}
+                  </pre>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setSelected(null)}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </Layout>
     </ProtectedRoute>
   );

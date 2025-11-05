@@ -63,6 +63,65 @@ class PredictionService:
         db_prediction.updated_at = datetime.utcnow()
         self.db.commit()
         self.db.refresh(db_prediction)
+        
+        # Generate alert if anomaly is detected
+        if prediction_update.anomaly_detected and prediction_update.status == "completed":
+            try:
+                # Simple alert generation without async complexity
+                from .models import Alert, AlertSeverity, AlertStatus
+                from datetime import datetime
+                
+                # Determine severity based on anomaly score and confidence
+                severity = AlertSeverity.INFO
+                if db_prediction.anomaly_score and db_prediction.confidence_score:
+                    if db_prediction.anomaly_score > 0.8 and db_prediction.confidence_score > 0.7:
+                        severity = AlertSeverity.CRITICAL
+                    elif db_prediction.anomaly_score > 0.6 and db_prediction.confidence_score > 0.5:
+                        severity = AlertSeverity.WARNING
+                    else:
+                        severity = AlertSeverity.INFO
+                
+                # Create alert title and message
+                title = f"Anomalía Detectada en {db_prediction.equipment_name}"
+                message = f"Se ha detectado una anomalía con score {db_prediction.anomaly_score:.3f} y confianza {db_prediction.confidence_score:.3f}. "
+                
+                if severity == AlertSeverity.CRITICAL:
+                    message += "Se requiere atención inmediata."
+                elif severity == AlertSeverity.WARNING:
+                    message += "Se recomienda monitoreo cercano."
+                else:
+                    message += "Se recomienda revisión rutinaria."
+                
+                # Check if similar alert already exists (avoid duplicates)
+                existing_alert = self.db.query(Alert).filter(
+                    Alert.prediction_id == db_prediction.id,
+                    Alert.status == AlertStatus.ACTIVE,
+                    Alert.created_at > datetime.utcnow() - timedelta(hours=1)
+                ).first()
+                
+                if not existing_alert:
+                    # Create new alert
+                    new_alert = Alert(
+                        equipment_id=db_prediction.equipment_id,
+                        equipment_name=db_prediction.equipment_name,
+                        title=title,
+                        message=message,
+                        severity=severity,
+                        prediction_id=db_prediction.id,
+                        anomaly_score=db_prediction.anomaly_score,
+                        confidence_score=db_prediction.confidence_score
+                    )
+                    
+                    self.db.add(new_alert)
+                    self.db.commit()
+                    print(f"✅ Alerta generada automáticamente: {title}")
+                
+            except Exception as e:
+                import traceback
+                print(f"⚠️ Error generating alert: {e}")
+                print(f"⚠️ Traceback: {traceback.format_exc()}")
+                # Don't fail the prediction update if alert generation fails
+        
         return db_prediction
 
     def get_prediction(self, prediction_id: int) -> Optional[Prediction]:

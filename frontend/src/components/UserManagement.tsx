@@ -14,6 +14,7 @@ interface UserFormData {
   username: string;
   password: string;
   role: "admin" | "viewer" | "tecnico";
+  is_active: boolean;
 }
 
 export default function UserManagement() {
@@ -55,6 +56,7 @@ export default function UserManagement() {
           email: data.email,
           username: data.username,
           role: data.role,
+          is_active: data.is_active,
         };
         await authService.updateUser(editingUser.id, updateData);
         toast.success("User updated successfully");
@@ -89,6 +91,7 @@ export default function UserManagement() {
       email: user.email,
       username: user.username,
       role: user.role,
+      is_active: user.is_active,
     });
   };
 
@@ -107,7 +110,13 @@ export default function UserManagement() {
   const handleCancel = () => {
     setShowForm(false);
     setEditingUser(null);
-    reset();
+    reset({
+      email: "",
+      username: "",
+      password: "",
+      role: "viewer",
+      is_active: true,
+    });
   };
 
   if (isLoading) {
@@ -334,6 +343,53 @@ export default function UserManagement() {
                   </p>
                 )}
               </div>
+
+              {editingUser && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Estado del Usuario
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg
+                        className="h-5 w-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <select
+                      {...register("is_active")}
+                      className="block w-full pl-10 pr-3 py-3 border-0 rounded-xl bg-gray-50/50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200 appearance-none cursor-pointer"
+                    >
+                      <option value="true">Activo</option>
+                      <option value="false">Inactivo</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <svg
+                        className="h-5 w-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Modal Actions */}

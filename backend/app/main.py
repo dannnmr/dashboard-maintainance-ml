@@ -23,6 +23,7 @@ from .user_routes import router as user_router
 from .prediction_routes import router as prediction_router
 from .simple_routes import router as simple_router
 from .report_routes import router as report_router
+from .alert_routes import router as alert_router
 from .auth import get_current_active_user
 
 # Initialize FastAPI app
@@ -47,6 +48,7 @@ app.include_router(user_router, prefix="/users", tags=["users"])
 app.include_router(prediction_router, prefix="/predictions", tags=["predictions"])
 app.include_router(simple_router, tags=["simple"])
 app.include_router(report_router, prefix="/reports", tags=["reports"])
+app.include_router(alert_router, prefix="/alerts", tags=["alerts"])
 
 # Initialize service
 service = AnomalyService("modelo/artifacts_anomalia")
@@ -61,6 +63,76 @@ async def startup_event():
 def health():
     ok, details = service.healthcheck()
     return HealthResponse(status="ok" if ok else "error", details=details)
+
+@app.post("/predict/test", response_model=PredictResponse)
+def predict_test(req: PredictRequest):
+    """
+    Endpoint de prueba sin almacenamiento en BD para debug
+    """
+    try:
+        if req.records and len(req.records) > 0:
+            # Single or batch prediction from records
+            df, preds = service.predict_from_records(req.records)
+            
+            # Return results without database storage
+            return PredictResponse(
+                model_version=service.meta.get("model_version", "unknown"),
+                feature_order=service.feature_columns,
+                results=preds,
+                data_info={
+                    "total_rows": len(df),
+                    "file_source": "records",
+                    "threshold_used": service.meta.get("operate_thr", 0.6),
+                    "lookback_window": service.meta.get("lookback", 24),
+                    "horizon_shift": service.meta.get("horizon_shift", 360),
+                    "ae_only_mode": service.meta.get("operate_with_ae_only", True),
+                    "prediction_type": "test_prediction"
+                }
+            )
+        
+        elif req.gold_parquet_path:
+            # Prediction from parquet file - simplified approach
+            import pandas as pd
+            from pathlib import Path
+            
+            # Read parquet file directly
+            parquet_path = Path(req.gold_parquet_path)
+            if not parquet_path.exists():
+                raise HTTPException(status_code=404, detail=f"File not found: {req.gold_parquet_path}")
+            
+            df = pd.read_parquet(parquet_path)
+            
+            # Limit rows if specified
+            if req.limit_rows and req.limit_rows > 0:
+                df = df.tail(req.limit_rows)
+            
+            # Use the same prediction logic as simple_routes
+            df_pred, preds = service._predict_df(df)
+            
+            return PredictResponse(
+                model_version=service.meta.get("model_version", "unknown"),
+                feature_order=service.feature_columns,
+                results=preds,
+                data_info={
+                    "total_rows": len(df),
+                    "file_source": req.gold_parquet_path,
+                    "threshold_used": service.meta.get("operate_thr", 0.6),
+                    "lookback_window": service.meta.get("lookback", 24),
+                    "horizon_shift": service.meta.get("horizon_shift", 360),
+                    "ae_only_mode": service.meta.get("operate_with_ae_only", True),
+                    "prediction_type": "test_prediction"
+                }
+            )
+        
+        else:
+            raise HTTPException(status_code=400, detail="Either 'records' or 'gold_parquet_path' must be provided")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error in test prediction: {str(e)}")
 
 @app.post("/predict", response_model=PredictResponse)
 def predict(
@@ -88,7 +160,7 @@ def predict(
                 prediction_data = PredictionCreate(
                     input_type="single" if len(req.records) == 1 else "batch",
                     input_source="records",
-                    input_features=record,
+                    input_features=[record],
                     input_metadata={
                         "batch_size": len(req.records),
                         "record_index": i,
@@ -184,7 +256,7 @@ def predict(
 @app.get("/features", response_model=FeaturesResponse)
 def features():
     return FeaturesResponse(
-        feature_columns=service.feature_columns,
+        feature_order=service.feature_columns,
         model_version=service.meta.get("model_version", "unknown")
     )
 
@@ -214,7 +286,7 @@ def predict_from_gold_data(
             prediction_data = PredictionCreate(
                 input_type="parquet",
                 input_source="gold_data",
-                input_features={"batch_prediction": True, "index": i},
+                input_features=[{"batch_prediction": True, "index": i}],
                 input_metadata={
                     "file_path": req.gold_parquet_path,
                     "limit_rows": req.limit_rows,

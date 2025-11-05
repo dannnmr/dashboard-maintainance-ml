@@ -128,7 +128,7 @@ class AnomalyService:
                 medians = self.bundle._try_load_joblib("medians.pkl")
                 if medians is not None:
                     # Use median values as base and add small variations
-                    median_values = np.array([medians[col] if col in medians.index else base_row[i] for i, col in enumerate(self.feature_columns) if col in df_window.columns])
+                    median_values = np.array([medians[col] if col in medians.index else base_row[i] for i, col in enumerate(available_cols)])
                     seq = np.array([median_values + np.random.normal(0, 0.05, median_values.shape) for _ in range(LOOKBACK)])
                 else:
                     # Fallback: use the input row with small variations

@@ -31,6 +31,19 @@ export type PredictResponse = {
   };
 };
 
+export type Transformer = {
+  id: string;
+  name: string;
+  location: string;
+};
+
+export type ReportFilters = {
+  transformer_id: string;
+  start_date?: string;
+  end_date?: string;
+  sample_hours: number;
+};
+
 const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 // Create axios instance
@@ -102,4 +115,58 @@ export async function getMaintenanceResults(): Promise<PredictResponse> {
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
+}
+
+// Funciones para reportes
+export async function getAvailableTransformers(): Promise<{
+  transformers: Transformer[];
+}> {
+  const res = await fetch(`${BASE}/reports/available-transformers`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function downloadHistoricalDataCSV(
+  filters: ReportFilters
+): Promise<Blob> {
+  const params = new URLSearchParams({
+    transformer_id: filters.transformer_id,
+    sample_hours: filters.sample_hours.toString(),
+  });
+
+  if (filters.start_date) params.append("start_date", filters.start_date);
+  if (filters.end_date) params.append("end_date", filters.end_date);
+
+  const res = await fetch(`${BASE}/reports/historical-data/csv?${params}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.blob();
+}
+
+export async function downloadHistoricalDataPDF(
+  filters: ReportFilters
+): Promise<Blob> {
+  const params = new URLSearchParams({
+    transformer_id: filters.transformer_id,
+    sample_hours: filters.sample_hours.toString(),
+  });
+
+  if (filters.start_date) params.append("start_date", filters.start_date);
+  if (filters.end_date) params.append("end_date", filters.end_date);
+
+  const res = await fetch(`${BASE}/reports/historical-data/pdf?${params}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.blob();
+}
+
+export async function downloadPredictionsCSV(
+  start_date?: string,
+  end_date?: string
+): Promise<Blob> {
+  const params = new URLSearchParams();
+  if (start_date) params.append("start_date", start_date);
+  if (end_date) params.append("end_date", end_date);
+
+  const res = await fetch(`${BASE}/reports/predictions/csv?${params}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.blob();
 }

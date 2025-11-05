@@ -4,14 +4,14 @@
   --background: #fafafa;
   --foreground: #2d3748;
   --accent: #4299e1;
-  --border: #e2e8f0;
+  --border: #4e5155;
   --muted: #64748b;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #1a202c;
-    --foreground: #e2e8f0;
+    --foreground: #4e4f51;
     --accent: #63b3ed;
     --border: #2d3748;
     --muted: #a0aec0;

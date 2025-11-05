@@ -63,7 +63,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
             </button>
 
             <h1 className="ml-4 lg:ml-0 text-lg font-medium text-gray-900">
-              ML Dashboard
+              Predictive Maintenance
             </h1>
           </div>
 

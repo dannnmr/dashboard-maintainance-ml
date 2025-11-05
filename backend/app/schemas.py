@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field, EmailStr
 from typing import List
 from datetime import datetime
-from .models import UserRole, PredictionStatus
+from .models import UserRole, PredictionStatus, AlertSeverity, AlertStatus
 
 class FeaturesResponse(BaseModel):
     feature_order: List[str]
@@ -127,3 +127,51 @@ class PredictionRequest(BaseModel):
     input_features: Dict[str, Any]
     input_metadata: Optional[Dict[str, Any]] = None
     model_version: Optional[str] = None
+
+# Alert schemas
+class AlertBase(BaseModel):
+    equipment_id: str = "TR01"
+    equipment_name: Optional[str] = "Transformador Principal"
+    title: str
+    message: str
+    severity: AlertSeverity
+    alert_type: str = "anomaly_detection"
+    source: str = "ml_model"
+    comments: Optional[str] = None
+    validation_status: Optional[str] = None
+
+class AlertCreate(AlertBase):
+    prediction_id: Optional[int] = None
+    anomaly_score: Optional[float] = None
+    confidence_score: Optional[float] = None
+
+class AlertUpdate(BaseModel):
+    status: Optional[AlertStatus] = None
+    message: Optional[str] = None
+    comments: Optional[str] = None
+    validation_status: Optional[str] = None
+
+class AlertResponse(AlertBase):
+    id: int
+    status: AlertStatus
+    prediction_id: Optional[int] = None
+    anomaly_score: Optional[float] = None
+    confidence_score: Optional[float] = None
+    acknowledged_by_user_id: Optional[int] = None
+    resolved_by_user_id: Optional[int] = None
+    created_at: datetime
+    acknowledged_at: Optional[datetime] = None
+    resolved_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+class AlertSummary(BaseModel):
+    total_alerts: int
+    critical_alerts: int
+    warning_alerts: int
+    info_alerts: int
+    active_alerts: int
+    acknowledged_alerts: int
+    resolved_alerts: int

@@ -4,7 +4,7 @@
 import os
 from pathlib import Path
 
-# Purpose: central configuration for Bronze (tags, time windows, paths)
+# central configuration for Bronze (tags, time windows, paths)
 TAGS = {
     "temperatura_aceite": "TR1.Top oil temperature",
     "temperatura_ambiente": "TR1.Ambient temperature",

@@ -10,7 +10,7 @@ import json
 
 router = APIRouter(tags=["reports"])
 
-@router.get("/reports/historical-data/csv")
+@router.get("/historical-data/csv")
 async def export_historical_data_csv(
     transformer_id: str = Query("TR01", description="ID del transformador"),
     start_date: Optional[str] = Query(None, description="Fecha inicio (YYYY-MM-DD)"),
@@ -64,11 +64,16 @@ async def export_historical_data_csv(
         
         # Filtrar por fechas si se proporcionan
         if start_date:
-            start_dt = pd.to_datetime(start_date)
+            start_dt = pd.to_datetime(start_date, utc=True)
+            # Asegurar que timestamp sea datetime64[ns, UTC]
+            combined_df["timestamp"] = pd.to_datetime(combined_df["timestamp"], utc=True)
             combined_df = combined_df[combined_df["timestamp"] >= start_dt]
         
         if end_date:
-            end_dt = pd.to_datetime(end_date)
+            end_dt = pd.to_datetime(end_date, utc=True)
+            # Asegurar que timestamp sea datetime64[ns, UTC]
+            if "timestamp" not in combined_df.columns or combined_df["timestamp"].dtype != "datetime64[ns, UTC]":
+                combined_df["timestamp"] = pd.to_datetime(combined_df["timestamp"], utc=True)
             combined_df = combined_df[combined_df["timestamp"] <= end_dt]
         
         # Muestrear datos
@@ -134,7 +139,7 @@ async def export_historical_data_csv(
         print(f"❌ Error generando CSV: {e}")
         raise HTTPException(status_code=500, detail=f"Error generando reporte CSV: {str(e)}")
 
-@router.get("/reports/historical-data/pdf")
+@router.get("/historical-data/pdf")
 async def generate_historical_data_pdf(
     transformer_id: str = Query("TR01", description="ID del transformador"),
     start_date: Optional[str] = Query(None, description="Fecha inicio (YYYY-MM-DD)"),
@@ -193,11 +198,16 @@ async def generate_historical_data_pdf(
         
         # Filtrar por fechas
         if start_date:
-            start_dt = pd.to_datetime(start_date)
+            start_dt = pd.to_datetime(start_date, utc=True)
+            # Asegurar que timestamp sea datetime64[ns, UTC]
+            combined_df["timestamp"] = pd.to_datetime(combined_df["timestamp"], utc=True)
             combined_df = combined_df[combined_df["timestamp"] >= start_dt]
         
         if end_date:
-            end_dt = pd.to_datetime(end_date)
+            end_dt = pd.to_datetime(end_date, utc=True)
+            # Asegurar que timestamp sea datetime64[ns, UTC]
+            if "timestamp" not in combined_df.columns or combined_df["timestamp"].dtype != "datetime64[ns, UTC]":
+                combined_df["timestamp"] = pd.to_datetime(combined_df["timestamp"], utc=True)
             combined_df = combined_df[combined_df["timestamp"] <= end_dt]
         
         # Muestrear datos
@@ -366,7 +376,7 @@ async def generate_historical_data_pdf(
         print(f"❌ Error generando PDF: {e}")
         raise HTTPException(status_code=500, detail=f"Error generando reporte PDF: {str(e)}")
 
-@router.get("/reports/predictions/csv")
+@router.get("/predictions/csv")
 async def export_predictions_csv(
     start_date: Optional[str] = Query(None, description="Fecha inicio (YYYY-MM-DD)"),
     end_date: Optional[str] = Query(None, description="Fecha fin (YYYY-MM-DD)")
@@ -414,7 +424,7 @@ async def export_predictions_csv(
         print(f"❌ Error generando CSV de predicciones: {e}")
         raise HTTPException(status_code=500, detail=f"Error generando CSV de predicciones: {str(e)}")
 
-@router.get("/reports/available-transformers")
+@router.get("/available-transformers")
 async def get_available_transformers():
     """
     Obtener lista de transformadores disponibles
